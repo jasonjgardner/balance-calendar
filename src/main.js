@@ -15,7 +15,6 @@
  * @property {float} amount - Balance adjustment for date
  */
 
-import "ace-css/css/ace.min.css";
 import "@/assets/css/index.scss";
 import Vue from "vue";
 import App from "./App.vue";

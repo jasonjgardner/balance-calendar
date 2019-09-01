@@ -1,17 +1,14 @@
 <template>
-  <div class="event-wrapper">
-    <div class="event-date">{{ event.date | toDate }}</div>
-    <div class="event-title">{{ event.title }}</div>
-    <div class="event-time">{{ event.date | toTime }}</div>
-    <span>
-      <div class="event-price">{{event.amount | toCurrency }}</div>
-    </span>
-    <button class="btn btn-primary bg-red" type="button" @click="$emit('remove', event)">Remove</button>
+  <div class="event">
+    <h4 class="event__title">{{ event.title }}</h4>
+    <p
+      :class="['event__amount', event.amount < 0 ? 'event__amount--debit' : 'event__amount--credit']"
+    >{{event.amount | toCurrency }}</p>
+    <button class="btn" type="button" @click="$emit('remove', event)">Remove</button>
   </div>
 </template>
 
 <script>
-import { format } from "date-fns";
 import { CalendarEvent } from "@/lib/CalendarEvent";
 
 export default {
@@ -21,10 +18,25 @@ export default {
       type: CalendarEvent,
       required: true
     }
-  },
-  filters: {
-    toDate: date => format(date, "MMM, do yyyy"),
-    toTime: date => format(date, "h:mm a")
   }
 };
 </script>
+
+<style lang="scss" scoped>
+.event {
+  &__title,
+  &__amount {
+    font-size: 0.825rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__title {
+    font-weight: 600;
+  }
+
+  &__amount {
+    font-size: 0.925em;
+  }
+}
+</style>

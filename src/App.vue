@@ -1,17 +1,27 @@
 <template>
   <div id="app">
-    <Calendar :events="events"/>
+    <Calendar :events="events" @select="showAddEvents = !!showAddEvents">
+      <template v-slot:toolbar>
+        <button class="btn" type="button" @click="showAddEvents = true">Add Event</button>
+      </template>
+    </Calendar>
     <div class="events">
-      <EventForm @submit="addEvent"/>
+      <EventForm
+        v-show="showAddEvents"
+        :date="selectedDate"
+        @submit="addEvent"
+        @dismissed="showAddEvents = false"
+      />
       <EventItem v-for="event in eventList" :event="event" :key="event.id" @remove="removeEvent"/>
     </div>
   </div>
 </template>
 
 <script>
-import Calendar from "./components/Calendar";
-import EventForm from "./components/EventForm";
-import EventItem from "./components/EventItem";
+import EventBus from "@/lib/EventBus";
+import Calendar from "@/components/Calendar";
+import EventForm from "@/components/EventForm";
+import EventItem from "@/components/EventItem";
 import CalendarEvent from "@/lib/CalendarEvent";
 
 export default {
@@ -23,8 +33,16 @@ export default {
   },
   data() {
     return {
-      events: []
+      events: [],
+      showAddEvents: false,
+      selectedDate: undefined
     };
+  },
+  mounted() {
+    EventBus.$on("select-day", ({ date }) => {
+      this.selectedDate = date;
+      this.showAddEvents = true;
+    });
   },
   computed: {
     eventList() {

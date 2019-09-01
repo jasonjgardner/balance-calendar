@@ -1,13 +1,27 @@
 <template>
   <section class="calendar" role="table">
-    <header class="calendar__month">
-      <h1>
-        <time :datetime="calendarMonthDateTime">{{ calendarMonth }}</time>
+    <header
+      :class="['calendar__month', `calendar__month--${format(currentDate, 'MMM').toLowerCase()}`]"
+    >
+      <h1 class="current-date">
+        <time :datetime="format(currentDate, 'yyyy-MM')">{{ format(currentDate, "MMMM yyyy") }}</time>
       </h1>
       <div class="calendar__toolbar" role="toolbar">
-        <button type="button" @click="goToLastMonth">&lt;&lt;</button>
-        <button type="button" @click="goToNextMonth">&gt;&gt;</button>
+        <slot name="toolbar"></slot>
+        <button
+          v-show="!isSameDay(today, currentDate)"
+          class="btn"
+          type="reset"
+          @click.prevent="changeMonth(0)"
+        >This Month</button>
+        <button class="btn" type="button" @click="changeMonth(-1)">{{ lastMonthLabel }}</button>
+        <button class="btn" type="button" @click="changeMonth(1)">{{ nextMonthLabel }}</button>
       </div>
+      <p class="selected-date">
+        <time
+          :datetime="format(selectedDate, 'yyyy-MM-dd')"
+        >{{ format(selectedDate, 'MMM d, yyyy') }}</time>
+      </p>
     </header>
     <div class="calendar__weekdays" role="columnheader">
       <h2>Sunday</h2>
@@ -48,6 +62,7 @@ import {
   isSameMonth,
   isToday,
   isSameDay,
+  isSameYear,
   isBefore,
   lastDayOfMonth,
   addMonths,
@@ -57,6 +72,7 @@ import {
   format
 } from "date-fns";
 import CalendarDay from "@/components/CalendarDay";
+import { EventBus } from "@/lib/EventBus";
 
 /**
  * Filter out events not happening today
@@ -74,7 +90,7 @@ const getEvents = (events, day) =>
  */
 const getBalance = (events, day, startingBalance = 0) =>
   events
-    .filter(({ date }) => isBefore(date, day))
+    .filter(({ date }) => isBefore(date, day) || isSameDay(date, day))
     .reduce(
       (previousBalance, { amount }) => parseFloat(amount) + previousBalance,
       startingBalance || 0
@@ -113,31 +129,19 @@ export default {
     this.currentDate = this.today;
   },
   computed: {
-    calendarMonth() {
-      const months = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December"
-      ];
-
-      return `${
-        months[this.currentDate.getMonth()]
-      } ${this.currentDate.getFullYear()}`;
+    nextMonthLabel() {
+      const nextMonth = addMonths(this.currentDate, 1);
+      return format(
+        nextMonth,
+        isSameYear(this.date, nextMonth) ? "MMMM" : "MMMM yyyy"
+      );
     },
-    calendarMonthDateTime() {
-      const month = this.currentDate.getMonth() + 1;
-      return `${this.currentDate.getFullYear()}-${
-        month < 10 ? `0${month}` : month
-      }`;
+    lastMonthLabel() {
+      const lastMonth = addMonths(this.currentDate, -1);
+      return format(
+        lastMonth,
+        isSameYear(this.date, lastMonth) ? "MMMM" : "MMMM yyyy"
+      );
     },
     /**
      * Creates an array of Day objects for visible dates
@@ -201,21 +205,18 @@ export default {
       this.currentDate = this.startDate;
       this.selectedDate = this.startDate;
     }
+
+    EventBus.$on("select-day", ({ date }) => (this.selectedDate = date));
   },
   methods: {
-    goToNextMonth() {
-      this.currentDate = addMonths(this.currentDate, 1);
-    },
-    goToLastMonth() {
-      this.currentDate = addMonths(this.currentDate, -1);
-    },
-    setSelectedDate({ date }) {
-      this.selectedDate = date;
-      /**
-       * @event input
-       * @type {Date} The selected calendar date
-       */
-      this.$emit("select", this.selectedDate);
+    format,
+    isSameDay,
+    /**
+     * Change the current month
+     * @param {Number} add - Use positive numbers to go foward in time, or negative numbers to go back in time.
+     */
+    changeMonth(add) {
+      this.currentDate = addMonths(this.currentDate, parseInt(add || 1, 10));
     },
     dayClassList({ date, balance }) {
       return {
@@ -274,24 +275,33 @@ export default {
   background-color: var(--white);
   display: grid;
 
-  &__month {
-    align-items: center;
-    display: flex;
-    flex-flow: row nowrap;
-    font-size: 1.25rem;
-    grid-column: 1 / span 7;
-    justify-content: space-between;
+  &__toolbar {
+    flex-grow: 1;
+    margin-left: auto;
+    text-align: right;
   }
 
   &__weekdays {
     font-size: 0.75rem;
     font-weight: normal;
-    letter-spacing: 0.125em;
-    text-transform: uppercase;
   }
 
   .day {
     border: 1px solid lightgray;
+  }
+}
+
+.calendar__month {
+  align-items: center;
+  display: flex;
+  flex-flow: row wrap;
+  font-size: 1.25rem;
+  grid-column: 1 / span 7;
+  justify-content: space-between;
+
+  .selected-date {
+    flex-grow: 1;
+    width: 100%;
   }
 }
 </style>

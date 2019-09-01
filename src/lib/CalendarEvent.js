@@ -6,34 +6,41 @@ export default class CalendarEvent {
   _amount;
   _id;
 
-  constructor(event) {
-    if (CalendarEvent.validate(event)) {
-      this.date = event.date;
-      this.title = event.title;
-      this.amount = event.amount;
+  constructor(calendarEventObj) {
+    if (CalendarEvent.validate(calendarEventObj)) {
+      this.date = calendarEventObj.date;
+      this.title = calendarEventObj.title;
+      this.amount = calendarEventObj.amount;
       this._id =
-        format(this.date, "yyyy-MM-dd") + `_${event.title.replace(/\s+/, "-")}`;
+        format(this.date, "yyyy-MM-dd") +
+        `_${calendarEventObj.title.replace(/\s+/, "-")}`;
     }
   }
 
-  static validate(event) {
+  static validate(calendarEventObj) {
     if (
-      !event.hasOwnProperty("date") ||
-      (typeof event.date !== "string" && !(event.date instanceof Date))
+      !calendarEventObj.hasOwnProperty("date") ||
+      (typeof calendarEventObj.date !== "string" &&
+        !(calendarEventObj.date instanceof Date))
     ) {
-      console.log(event);
       throw new Error(
         "`date` attribute is required and must be a date string or `Date` object."
       );
     }
 
-    if (!event.hasOwnProperty("title") || event.title.trim().length < 1) {
+    if (
+      !calendarEventObj.hasOwnProperty("title") ||
+      calendarEventObj.title.trim().length < 1
+    ) {
       throw new Error(
         "`title` attribute is required and must be at least one character long."
       );
     }
 
-    if (!event.hasOwnProperty("amount") || isNaN(parseFloat(event.amount))) {
+    if (
+      !calendarEventObj.hasOwnProperty("amount") ||
+      isNaN(parseFloat(calendarEventObj.amount))
+    ) {
       throw new Error(
         "`amount` attribute is required and must be a numeric value."
       );
