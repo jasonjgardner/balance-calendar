@@ -1,18 +1,10 @@
 /**
  * Calendar Day
  * @typedef {Object} CalendarDay
+ * @property {string} id - Unique identifier
  * @property {Date} date - Date and time of calendar day
- * @property {boolean} isCurrentMonth - `true` if day is in current month
- * @property {boolean} isToday - `true` if day is same as current day
- * @property {boolean} isSelected - `true` if day is same as selected date
- */
-
-/**
- * Calendar Event
- * @typedef {Object} CalendarEvent
- * @property {string|Date} date - Time of event
- * @property {string} title - Name of event
- * @property {float} amount - Balance adjustment for date
+ * @property {CalendarEvent[]} events - List of events for this day
+ * @property {number} balance - Expected balance by end of day
  */
 
 import "@/assets/css/index.scss";
@@ -27,10 +19,10 @@ Vue.filter("toCurrency", (value, locale = null, options = {}) => {
   }
 
   const formatter = new Intl.NumberFormat(locale || "en-US", {
-    style: "currency",
     currency: "USD",
     minimumFractionDigits: 2,
-    ...options
+    ...options,
+    style: "currency"
   });
 
   return formatter.format(value);

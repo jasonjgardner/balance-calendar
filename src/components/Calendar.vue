@@ -24,12 +24,18 @@
         <button class="btn" type="button" @click="selectedDate = null">Deselect</button>
       </div>
     </header>
-    <div v-once v-for="day in ['Sunday','Monday','Tuesday','Wednesday','Thurday','Friday','Saturday']" :class="['calendar__weekdays', `calendar__weekdays--${day.toLowerCase()}`]" :key="day" role="columnheader">
+    <div
+      v-once
+      v-for="day in ['Sunday','Monday','Tuesday','Wednesday','Thurday','Friday','Saturday']"
+      :class="['calendar__weekdays', `calendar__weekdays--${day.toLowerCase()}`]"
+      :key="day"
+      role="columnheader"
+    >
       <b>{{ day }}</b>
     </div>
     <CalendarDay
       v-for="day in calendarView"
-      :class="dayClassList"
+      :class="dayClassList(day)"
       :key="day.id"
       :day="day"
       role="cell"
@@ -94,14 +100,14 @@ export default {
       const nextMonth = addMonths(this.currentDate, 1);
       return format(
         nextMonth,
-        isSameYear(this.date, nextMonth) ? "MMMM" : "MMMM yyyy"
+        isSameYear(this.currentDate, nextMonth) ? "MMMM" : "MMMM yyyy"
       );
     },
     lastMonthLabel() {
       const lastMonth = addMonths(this.currentDate, -1);
       return format(
         lastMonth,
-        isSameYear(this.date, lastMonth) ? "MMMM" : "MMMM yyyy"
+        isSameYear(this.currentDate, lastMonth) ? "MMMM" : "MMMM yyyy"
       );
     },
     /**
@@ -173,11 +179,12 @@ export default {
         ? this.today || new Date()
         : addMonths(this.currentDate, +add);
     },
-    dayClassList({ date, balance }) {
+    dayClassList({ date, balance, events }) {
       return {
-        "day--in-month": isSameMonth(date, this.selectedDate),
+        "day--in-month": isSameMonth(date, this.currentDate),
         "day--is-selected": isSameDay(date, this.selectedDate),
         "day--is-today": isToday(date),
+        "day--no-events": events.length < 1,
         "balance--positive": balance > 0,
         "balance--negative": balance <= 0
       };

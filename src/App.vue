@@ -10,13 +10,14 @@
         >Add Event</button>
       </template>
     </Calendar>
-    <div class="events">
-      <EventForm
-        v-show="showAddEvents"
-        :date="selectedDate"
-        @submit="addEvent"
-        @dismissed="showAddEvents = false"
-      />
+    <EventForm
+    class="event-form"
+      v-show="showAddEvents"
+      :date="selectedDate"
+      @submit="addEvent"
+      @dismissed="showAddEvents = false"
+    />
+    <div class="events-list">
       <EventItem v-for="event in eventList" :event="event" :key="event.id" @remove="removeEvent"/>
     </div>
   </div>
@@ -83,9 +84,5 @@ export default {
   justify-content: center;
   margin: 1vh auto;
   max-width: 90%;
-
-  .events {
-    order: -1;
-  }
 }
 </style>
