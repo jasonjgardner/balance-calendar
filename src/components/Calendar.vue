@@ -26,12 +26,12 @@
     </header>
     <div
       v-once
-      v-for="day in ['Sunday','Monday','Tuesday','Wednesday','Thurday','Friday','Saturday']"
-      :class="['calendar__weekdays', `calendar__weekdays--${day.toLowerCase()}`]"
-      :key="day"
+      v-for="(dayLabel, fullDayLabel) in weekdays"
+      :class="['calendar__weekdays', `calendar__weekdays--${fullDayLabel.toLowerCase()}`]"
+      :key="fullDayLabel"
       role="columnheader"
     >
-      <b>{{ day }}</b>
+      <b>{{ dayLabel }}</b>
     </div>
     <CalendarDay
       v-for="day in calendarView"
@@ -60,8 +60,8 @@ import {
   setDate,
   format
 } from "date-fns";
-import CalendarDay from "@/components/CalendarDay";
 import { EventBus } from "@/lib/EventBus";
+import CalendarDay from "@/components/CalendarDay";
 
 export default {
   name: "Calendar",
@@ -91,11 +91,16 @@ export default {
     };
   },
   created() {
+    /// Set current and selected date to today by default
     this.today = new Date();
     this.selectedDate = this.today;
     this.currentDate = this.today;
   },
   computed: {
+    /**
+     * Returns name of next month. If next month is January, the following year is appended to the name.
+     * @returns {string} Month name, potentially followed by full year
+     */
     nextMonthLabel() {
       const nextMonth = addMonths(this.currentDate, 1);
       return format(
@@ -103,6 +108,10 @@ export default {
         isSameYear(this.currentDate, nextMonth) ? "MMMM" : "MMMM yyyy"
       );
     },
+    /**
+     * Returns name of previous month. If previous month is December, the previous year is appended to the name.
+     * @returns {string} Month name, potentially followed by full year
+     */
     lastMonthLabel() {
       const lastMonth = addMonths(this.currentDate, -1);
       return format(
@@ -117,6 +126,7 @@ export default {
     calendarView() {
       const date = this.currentDate;
 
+      //// Create days for this month
       const days = eachDayOfInterval({
         start: startOfMonth(date),
         end: endOfMonth(date)
@@ -127,7 +137,7 @@ export default {
         balance: this.getBalance(day)
       }));
 
-      // gen the days from last month
+      /// Create visible days for previous month
       let previousMonthCursor = lastDayOfMonth(addMonths(date, -1));
       const daysBefore = getDay(days[0].date);
       for (let itr = daysBefore; itr > 0; itr--) {
@@ -140,7 +150,7 @@ export default {
         previousMonthCursor = addDays(previousMonthCursor, -1);
       }
 
-      // gen days for next month
+      /// Create visible days for following month
       const daysAfter = days.length % 7 > 0 ? 7 - (days.length % 7) : 0;
 
       let nextMonthCursor = addMonths(date, 1);
@@ -157,14 +167,31 @@ export default {
       }
 
       return days;
+    },
+    /**
+     * Get list of days of the week and their desired abbreviations
+     * @returns {{[string]:string}} Returns object with weekday names as keys and their abbreviations as values.
+     */
+    weekdays() {
+      return {
+        Sunday: "Sun",
+        Monday: "Mon",
+        Tuesday: "Tue",
+        Wednesday: "Wed",
+        Thursday: "Thur",
+        Friday: "Fri",
+        Saturday: "Sat"
+      };
     }
   },
   mounted() {
+    /// Set current and selected day to the given start date
     if (this.startDate) {
       this.currentDate = this.startDate;
       this.selectedDate = this.startDate;
     }
 
+    /// Listen for date selection event
     EventBus.$on("select-day", ({ date }) => (this.selectedDate = date));
   },
   methods: {
@@ -179,6 +206,11 @@ export default {
         ? this.today || new Date()
         : addMonths(this.currentDate, +add);
     },
+    /**
+     * Create a detailed class list for a calendar day.
+     * @param {CalendarDay} day - The day to examine
+     * @returns {{[string]:boolean}} Returns classes as keys and activation as values
+     */
     dayClassList({ date, balance, events }) {
       return {
         "day--in-month": isSameMonth(date, this.currentDate),

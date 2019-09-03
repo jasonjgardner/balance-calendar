@@ -103,6 +103,10 @@ export default {
   }),
   watch: {
     event: {
+      /**
+       * Watch event model for changes
+       * @param {CalendarEvent|Object} value - Form model to validate
+       */
       handler: function(value) {
         this.isValid =
           value.title && value.title.length > 0 && value.amount !== 0;
@@ -120,16 +124,29 @@ export default {
   },
   methods: {
     format,
+    /**
+     * Emits event data to store
+     * @event EventForm#addEvent~submit
+     */
     addEvent() {
       this.$emit("submit", this.event);
       this.event = {};
     },
+    /**
+     * Sets the event amount to a negative value
+     */
     amountDebit() {
       this.event.amount = Math.abs(this.event.amount) * -1;
     },
+    /**
+     * Sets the event amount to a positive value
+     */
     amountCredit() {
       this.event.amount = Math.abs(this.event.amount);
     },
+    /**
+     * Selects input value on click or focus
+     */
     selectAll(focusEvent) {
       focusEvent.target.select();
     }

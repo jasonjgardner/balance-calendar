@@ -21,8 +21,13 @@ export default {
     }
   },
   methods: {
+    /**
+     * Emits CalendarEvent data to remove
+     * @event EventBus#remove~remove-event
+     * @type {CalendarEvent}
+     */
     remove() {
-      EventBus.$emit('remove-event', this.event);
+      EventBus.$emit("remove-event", this.event);
     }
   }
 };

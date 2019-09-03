@@ -1,7 +1,7 @@
 <template>
-  <article class="day" role="cell" :title="longDate" @click="selectDay">
+  <article class="day" role="cell" :title="format(day.date, 'PPPP')" @click="selectDay">
     <h3 class="day__title">
-      <time :datetime="dateTime">{{ calendarDate }}</time>
+      <time :datetime="format(day.date, 'yyyy-M-dd')">{{ format(day.date, "d") }}</time>
     </h3>
     <div class="day__events">
       <EventItem v-for="event in day.events" :event="event" :key="event.id"/>
@@ -26,18 +26,13 @@ export default {
       required: true
     }
   },
-  computed: {
-    longDate() {
-      return format(this.day.date, "PPPP");
-    },
-    calendarDate() {
-      return format(this.day.date, "d");
-    },
-    dateTime() {
-      return format(this.day.date, "yyyy-M-dd");
-    }
-  },
   methods: {
+    format,
+    /**
+     * Day selected event
+     * @event CalendarDay#selectDay
+     * @type {CalendarDay}
+     */
     selectDay() {
       EventBus.$emit("select-day", this.day);
     }
