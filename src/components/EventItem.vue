@@ -4,11 +4,12 @@
     <p
       :class="['event__amount', event.amount < 0 ? 'event__amount--debit' : 'event__amount--credit']"
     >{{event.amount | toCurrency }}</p>
-    <button class="btn" type="button" @click="$emit('remove', event)">Remove</button>
+    <button class="btn" type="button" @click="remove">Remove</button>
   </div>
 </template>
 
 <script>
+import { EventBus } from "@/lib/EventBus";
 import { CalendarEvent } from "@/lib/CalendarEvent";
 
 export default {
@@ -17,6 +18,11 @@ export default {
     event: {
       type: CalendarEvent,
       required: true
+    }
+  },
+  methods: {
+    remove() {
+      EventBus.$emit('remove-event', this.event);
     }
   }
 };

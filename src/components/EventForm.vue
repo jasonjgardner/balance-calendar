@@ -1,6 +1,23 @@
 <template>
   <form @submit.prevent="addEvent">
-    <fieldset class="border">
+    <fieldset>
+      <div v-if="!date" class="input-group">
+        <label class="label" for="event[date]">Date</label>
+        <input
+          class="input"
+          type="date"
+          id="event[date]"
+          name="event[date]"
+          placeholder="MM/DD/YYYY"
+          required
+          v-model="event.date"
+        >
+      </div>
+      <div v-else class="input-group">
+        <h3>{{ format(date, 'MMMM d, yyyy') }}</h3>
+        <input type="hidden" name="event[date]" :value="date">
+      </div>
+
       <div class="input-group">
         <label class="label" for="event[title]">Name</label>
         <input
@@ -16,19 +33,6 @@
       </div>
 
       <div class="input-group">
-        <label class="label" for="event[date]">Date</label>
-        <input
-          class="input"
-          type="date"
-          id="event[date]"
-          name="event[date]"
-          placeholder="MM/DD/YYYY"
-          required
-          v-model="event.date"
-        >
-      </div>
-
-      <div class="input-group">
         <label class="label" for="event[amount]">Amount</label>
         <input
           class="input"
@@ -38,6 +42,8 @@
           step="0.01"
           pattern="^-?[1-9]+"
           placeholder="Credit or debit amount"
+          min="-9999999.99"
+          max="9999999.99"
           required
           v-model="event.amount"
           @click="selectAll"
@@ -99,19 +105,21 @@ export default {
     event: {
       handler: function(value) {
         this.isValid =
-          value.title &&
-          value.title.length > 0 &&
-          value.date.length > 0 &&
-          value.amount !== 0;
+          value.title && value.title.length > 0 && value.amount !== 0;
+
+        if (this.isValid) {
+          this.event.date = value.date ? value.date : this.date;
+        }
       },
       deep: true,
       immediate: true
     }
   },
   created() {
-    this.event.date = format(this.date, "yyyy-MM-dd");
+    this.event.date = this.date;
   },
   methods: {
+    format,
     addEvent() {
       this.$emit("submit", this.event);
       this.event = {};

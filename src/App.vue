@@ -2,7 +2,12 @@
   <div id="app">
     <Calendar :events="events" @select="showAddEvents = !!showAddEvents">
       <template v-slot:toolbar>
-        <button class="btn" type="button" @click="showAddEvents = true">Add Event</button>
+        <button
+          v-show="!showAddEvents"
+          class="btn"
+          type="button"
+          @click="showAddEvents = true"
+        >Add Event</button>
       </template>
     </Calendar>
     <div class="events">
@@ -18,7 +23,7 @@
 </template>
 
 <script>
-import EventBus from "@/lib/EventBus";
+import { EventBus } from "@/lib/EventBus";
 import Calendar from "@/components/Calendar";
 import EventForm from "@/components/EventForm";
 import EventItem from "@/components/EventItem";
@@ -43,6 +48,8 @@ export default {
       this.selectedDate = date;
       this.showAddEvents = true;
     });
+
+    EventBus.$on("remove-event", this.removeEvent);
   },
   computed: {
     eventList() {
@@ -68,9 +75,17 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 #app {
+  align-items: center;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
   margin: 1vh auto;
   max-width: 90%;
+
+  .events {
+    order: -1;
+  }
 }
 </style>

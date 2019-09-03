@@ -13,7 +13,7 @@ export default class CalendarEvent {
       this.amount = calendarEventObj.amount;
       this._id =
         format(this.date, "yyyy-MM-dd") +
-        `_${calendarEventObj.title.replace(/\s+/, "-")}`;
+        `_${calendarEventObj.title.replace(/\s+/, "-")}${+new Date()}`;
     }
   }
 

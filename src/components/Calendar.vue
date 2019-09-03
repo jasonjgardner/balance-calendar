@@ -17,32 +17,15 @@
         <button class="btn" type="button" @click="changeMonth(-1)">{{ lastMonthLabel }}</button>
         <button class="btn" type="button" @click="changeMonth(1)">{{ nextMonthLabel }}</button>
       </div>
-      <p class="selected-date">
+      <div v-if="selectedDate" class="selected-date">
         <time
           :datetime="format(selectedDate, 'yyyy-MM-dd')"
         >{{ format(selectedDate, 'MMM d, yyyy') }}</time>
-      </p>
+        <button class="btn" type="button" @click="selectedDate = null">Deselect</button>
+      </div>
     </header>
-    <div class="calendar__weekdays" role="columnheader">
-      <h2>Sunday</h2>
-    </div>
-    <div class="calendar__weekdays" role="columnheader">
-      <h2>Monday</h2>
-    </div>
-    <div class="calendar__weekdays" role="columnheader">
-      <h2>Tuesday</h2>
-    </div>
-    <div class="calendar__weekdays" role="columnheader">
-      <h2>Wednesday</h2>
-    </div>
-    <div class="calendar__weekdays" role="columnheader">
-      <h2>Thursday</h2>
-    </div>
-    <div class="calendar__weekdays" role="columnheader">
-      <h2>Friday</h2>
-    </div>
-    <div class="calendar__weekdays" role="columnheader">
-      <h2>Saturday</h2>
+    <div v-once v-for="day in ['Sunday','Monday','Tuesday','Wednesday','Thurday','Friday','Saturday']" :class="['calendar__weekdays', `calendar__weekdays--${day.toLowerCase()}`]" :key="day" role="columnheader">
+      <b>{{ day }}</b>
     </div>
     <CalendarDay
       v-for="day in calendarView"
@@ -73,28 +56,6 @@ import {
 } from "date-fns";
 import CalendarDay from "@/components/CalendarDay";
 import { EventBus } from "@/lib/EventBus";
-
-/**
- * Filter out events not happening today
- * @param {CalendarEvent[]} events - List of events to filter
- * @param {Date} day - The event date to include
- */
-const getEvents = (events, day) =>
-  events.filter(({ date }) => isSameDay(date, day));
-
-/**
- * Calculates balance for events up until the given day
- * @param {CalendarEvent[]} events - List of events to summarize
- * @param {Date} day - The calendar day
- * @param {Number} [startingBalance=0] - The existing balance
- */
-const getBalance = (events, day, startingBalance = 0) =>
-  events
-    .filter(({ date }) => isBefore(date, day) || isSameDay(date, day))
-    .reduce(
-      (previousBalance, { amount }) => parseFloat(amount) + previousBalance,
-      startingBalance || 0
-    );
 
 export default {
   name: "Calendar",
@@ -156,8 +117,8 @@ export default {
       }).map(day => ({
         id: format(day, "yyyy-MM-dd"),
         date: day,
-        events: getEvents(this.events, day),
-        balance: getBalance(this.events, day, this.startingBalance)
+        events: this.getEvents(day),
+        balance: this.getBalance(day)
       }));
 
       // gen the days from last month
@@ -167,12 +128,8 @@ export default {
         days.unshift({
           id: format(previousMonthCursor, "yyyy-MM-dd"),
           date: previousMonthCursor,
-          events: getEvents(this.events, previousMonthCursor),
-          balance: getBalance(
-            this.events,
-            previousMonthCursor,
-            this.startingBalance
-          )
+          events: this.getEvents(previousMonthCursor),
+          balance: this.getBalance(previousMonthCursor)
         });
         previousMonthCursor = addDays(previousMonthCursor, -1);
       }
@@ -187,12 +144,8 @@ export default {
         days.push({
           id: format(nextMonthCursor, "yyyy-MM-dd"),
           date: nextMonthCursor,
-          events: getEvents(this.events, nextMonthCursor),
-          balance: getBalance(
-            this.events,
-            nextMonthCursor,
-            this.startingBalance
-          )
+          events: this.getEvents(nextMonthCursor),
+          balance: this.getBalance(nextMonthCursor)
         });
         nextMonthCursor = addDays(nextMonthCursor, 1);
       }
@@ -216,7 +169,9 @@ export default {
      * @param {Number} add - Use positive numbers to go foward in time, or negative numbers to go back in time.
      */
     changeMonth(add) {
-      this.currentDate = addMonths(this.currentDate, parseInt(add || 1, 10));
+      this.currentDate = !add
+        ? this.today || new Date()
+        : addMonths(this.currentDate, +add);
     },
     dayClassList({ date, balance }) {
       return {
@@ -226,6 +181,29 @@ export default {
         "balance--positive": balance > 0,
         "balance--negative": balance <= 0
       };
+    },
+    /**
+     * Filter out events not happening on a given date
+     * @param {CalendarEvent[]} events - List of events to filter
+     * @param {Date} day - The event date to include
+     */
+    getEvents(day) {
+      return this.events.slice().filter(({ date }) => isSameDay(date, day));
+    },
+    /**
+     * Calculates balance for events up until the given day
+     * @param {CalendarEvent[]} events - List of events to summarize
+     * @param {Date} day - The calendar day
+     * @param {Number} [startingBalance=0] - The existing balance
+     */
+    getBalance(day, startingBalance = 0) {
+      return this.events
+        .slice()
+        .filter(({ date }) => isBefore(date, day) || isSameDay(date, day))
+        .reduce(
+          (previousBalance, { amount }) => parseFloat(amount) + previousBalance,
+          startingBalance || this.startingBalance || 0
+        );
     }
   }
 };
@@ -300,8 +278,13 @@ export default {
   justify-content: space-between;
 
   .selected-date {
+    display: flex;
     flex-grow: 1;
     width: 100%;
+
+    .btn {
+      margin-left: auto;
+    }
   }
 }
 </style>
