@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="addEvent">
+  <form class="event-form" @submit.prevent="addEvent">
     <fieldset>
       <div v-if="!date" class="input-group">
         <label class="label" for="event[date]">Date</label>
@@ -14,7 +14,7 @@
         >
       </div>
       <div v-else class="input-group">
-        <h3>{{ format(date, 'MMMM d, yyyy') }}</h3>
+        <time class="label--day">{{ format(date, 'cccc, MMMM d, yyyy') }}</time>
         <input type="hidden" name="event[date]" :value="date">
       </div>
 
@@ -153,3 +153,37 @@ export default {
   }
 };
 </script>
+
+<style lang="scss">
+.event-form {
+  background-color: var(--event-form__background-color);
+  border: 1px solid var(--event-form__border-color);
+  width: var(--event-form__size);
+
+  & > fieldset {
+    border: 0;
+    height: 100%;
+  }
+}
+
+.input-group {
+  align-items: center;
+  display: flex;
+}
+
+.label {
+  display: inline-block;
+  font-size: 0.825rem;
+  font-weight: 600;
+  margin-right: var(--size_base);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: calc(12 * var(--size_base));
+}
+
+.input {
+  border: 1px solid var(--input__border-color);
+  border-radius: calc(0.5 * var(--size_base));
+  padding: var(--size_base);
+}
+</style>

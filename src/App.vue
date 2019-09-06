@@ -1,25 +1,22 @@
 <template>
-  <div id="app">
-    <Calendar :events="events" @select="showAddEvents = !!showAddEvents">
-      <template v-slot:toolbar>
-        <button
-          v-show="!showAddEvents"
-          class="btn"
-          type="button"
-          @click="showAddEvents = true"
-        >Add Event</button>
-      </template>
-    </Calendar>
-    <EventForm
-      class="event-form"
-      v-show="showAddEvents"
-      :date="selectedDate"
-      @submit="addEvent"
-      @dismissed="showAddEvents = false"
-    />
-    <div class="events-list">
+  <div id="app" role="application">
+    <main>
+      <Calendar :events="events" @select="showAddEvents = !!showAddEvents">
+        <template v-slot:toolbar>
+          <button
+            v-show="!showAddEvents"
+            class="btn"
+            type="button"
+            @click="showAddEvents = true"
+          >Add Event</button>
+        </template>
+      </Calendar>
+    </main>
+    <div class="event-list">
+      <h3>Events</h3>
       <EventItem v-for="event in eventList" :event="event" :key="event.id" @remove="removeEvent"/>
     </div>
+    <EventForm :date="selectedDate" @submit="addEvent" @dismissed="showAddEvents = false"/>
   </div>
 </template>
 
@@ -118,11 +115,19 @@ export default {
 
 <style lang="scss">
 #app {
-  align-items: center;
+  align-items: stretch;
   display: flex;
-  flex-flow: column nowrap;
-  justify-content: center;
-  margin: 1vh auto;
-  max-width: 90%;
+  flex-flow: row nowrap;
+  width: 100%;
+}
+
+.event-list {
+  background-color: var(--event-list__background);
+  color: var(--event-list__color);
+  width: var(--event-list__size);
+}
+
+.event-form {
+  order: -2;
 }
 </style>

@@ -10,8 +10,91 @@
 import "@/assets/css/index.scss";
 import Vue from "vue";
 import App from "./App.vue";
+import Unicon from "vue-unicons";
+import {
+  uniAngleRight,
+  uniAngleDown,
+  uniAngleUp,
+  uniAngleLeft,
+  uniMoneyStack,
+  uniBill,
+  uniMoneyWithdrawal,
+  uniInvoice,
+  uniReceipt,
+  uniMoneyInsert,
+  uniMoneyWithdraw,
+  uniCalendarAlt,
+  uniStepForward,
+  uniPrevious,
+  uniRedo,
+  uniPlus,
+  uniMinus,
+  uniEllipsisV,
+  uniEllipsisH,
+  uniCheck,
+  uniCalendarSlash,
+  uniMoneyBillStack,
+  uniReceiptAlt,
+  uniInfoCircle,
+  uniQuestionCircle,
+  uniExclamationTriangle,
+  uniExclamationOctagon,
+  uniSort,
+  uniRepeat,
+  uniCheckCircle,
+  uniPlusCircle,
+  uniTimesCircle,
+  uniCalender,
+  uniEditAlt,
+  uniTimes,
+  uniMinusCircle,
+  uniPlusSquare,
+  uniStar
+} from "vue-unicons/src/icons";
 
 Vue.config.productionTip = false;
+
+Unicon.add([
+  uniAngleRight,
+  uniAngleDown,
+  uniAngleUp,
+  uniAngleLeft,
+  uniMoneyStack,
+  uniBill,
+  uniMoneyWithdrawal,
+  uniInvoice,
+  uniReceipt,
+  uniMoneyInsert,
+  uniMoneyWithdraw,
+  uniCalendarAlt,
+  uniStepForward,
+  uniPrevious,
+  uniRedo,
+  uniPlus,
+  uniMinus,
+  uniEllipsisV,
+  uniEllipsisH,
+  uniCheck,
+  uniCalendarSlash,
+  uniMoneyBillStack,
+  uniReceiptAlt,
+  uniInfoCircle,
+  uniQuestionCircle,
+  uniExclamationTriangle,
+  uniExclamationOctagon,
+  uniSort,
+  uniRepeat,
+  uniCheckCircle,
+  uniPlusCircle,
+  uniTimesCircle,
+  uniCalender,
+  uniEditAlt,
+  uniTimes,
+  uniMinusCircle,
+  uniPlusSquare,
+  uniStar
+]);
+Vue.use(Unicon);
 
 Vue.filter("toCurrency", (value, locale = null, options = {}) => {
   if (typeof value !== "number") {

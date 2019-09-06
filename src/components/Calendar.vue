@@ -1,9 +1,9 @@
 <template>
-  <section class="calendar" role="table">
+  <section class="calendar" aria-label="Calendar" role="table">
     <header
       :class="['calendar__month', `calendar__month--${format(currentDate, 'MMM').toLowerCase()}`]"
     >
-      <h1 class="current-date">
+      <h1 class="current-date" aria-live="polite">
         <time :datetime="format(currentDate, 'yyyy-MM')">{{ format(currentDate, "MMMM yyyy") }}</time>
       </h1>
       <div class="calendar__toolbar" role="toolbar">
@@ -12,26 +12,39 @@
           v-show="!isSameDay(today, currentDate)"
           class="btn"
           type="reset"
+          title="Return to current month"
+          aria-label="This Month"
           @click.prevent="changeMonth(0)"
-        >This Month</button>
-        <button class="btn" type="button" @click="changeMonth(-1)">{{ lastMonthLabel }}</button>
-        <button class="btn" type="button" @click="changeMonth(1)">{{ nextMonthLabel }}</button>
+        >
+          <unicon name="previous" fill="currentColor"/>
+        </button>
+        <button class="btn" type="button" @click="changeMonth(-1)">
+          <unicon name="angle-left" fill="currentColor"/>
+          <span>{{ lastMonthLabel }}</span>
+        </button>
+        <button class="btn" type="button" @click="changeMonth(1)">
+          <span>{{ nextMonthLabel }}</span>
+          <unicon name="angle-right" fill="currentColor"/>
+        </button>
       </div>
       <div v-if="selectedDate" class="selected-date">
         <time
           :datetime="format(selectedDate, 'yyyy-MM-dd')"
         >{{ format(selectedDate, 'MMM d, yyyy') }}</time>
-        <button class="btn" type="button" @click="selectedDate = null">Deselect</button>
+        <button class="btn btn--link" type="button" @click="selectedDate = null">
+          <unicon name="times-circle" fill="currentColor"/>
+        </button>
       </div>
     </header>
     <div
       v-once
-      v-for="(dayLabel, fullDayLabel) in weekdays"
-      :class="['calendar__weekdays', `calendar__weekdays--${fullDayLabel.toLowerCase()}`]"
+      v-for="(weekdayLabel, fullDayLabel) in weekdays"
+      :class="weekdayClassList(fullDayLabel)"
+      :title="fullDayLabel"
       :key="fullDayLabel"
       role="columnheader"
     >
-      <b>{{ dayLabel }}</b>
+      <b>{{ weekdayLabel }}</b>
     </div>
     <CalendarDay
       v-for="day in calendarView"
@@ -151,7 +164,8 @@ export default {
       }
 
       /// Create visible days for following month
-      const daysAfter = days.length % 7 > 0 ? 7 - (days.length % 7) : 0;
+      const daysRemaining = days.length % 7;
+      const daysAfter = daysRemaining > 0 ? 7 - daysRemaining : 0;
 
       let nextMonthCursor = addMonths(date, 1);
       nextMonthCursor = setDate(nextMonthCursor, 1);
@@ -173,15 +187,30 @@ export default {
      * @returns {{[string]:string}} Returns object with weekday names as keys and their abbreviations as values.
      */
     weekdays() {
-      return {
-        Sunday: "Sun",
-        Monday: "Mon",
-        Tuesday: "Tue",
-        Wednesday: "Wed",
-        Thursday: "Thur",
-        Friday: "Fri",
-        Saturday: "Sat"
-      };
+      const fullNames = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday"
+      ];
+
+      let labels = fullNames;
+
+      if (localStorage.abbreviateCalendarLabels) {
+        labels = ["Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"];
+      }
+
+      if (localStorage.abbreviateCalendarLabels === "SINGLE_CHARACTER") {
+        labels = labels.map(a => a.charAt(0));
+      }
+
+      return labels.reduce((previousValue, value, idx) => {
+        previousValue[fullNames[idx]] = value;
+        return previousValue;
+      }, {});
     }
   },
   mounted() {
@@ -221,6 +250,18 @@ export default {
         "balance--negative": balance <= 0
       };
     },
+    weekdayClassList(weekday) {
+      const lowerWeekday = weekday.toLowerCase();
+
+      return [
+        "calendar__weekdays",
+        `calendar__weekdays--${lowerWeekday}`,
+        {
+          "calendar__weekdays--today":
+            lowerWeekday === format(this.currentDate, "EEEE").toLowerCase()
+        }
+      ];
+    },
     /**
      * Filter out events not happening on a given date
      * @param {CalendarEvent[]} events - List of events to filter
@@ -249,48 +290,17 @@ export default {
 </script>
 
 <style lang="scss">
-.day {
-  align-items: flex-start;
-  color: var(--black-200);
-  display: flex;
-  justify-content: space-between;
-  flex-flow: column nowrap;
-  font-size: 1rem;
-
-  &--is-selected {
-    border: 1px solid var(--blue-grey-100);
-  }
-
-  &--in-month {
-    color: var(--black-100);
-  }
-
-  &--is-today {
-    background: var(--black-400);
-  }
-
-  &__title,
-  &__balance {
-    box-sizing: border-box;
-    display: inline-block;
-    font-size: 1rem;
-    font-weight: 600;
-    margin: 0;
-    padding: 0.25rem;
-    width: 100%;
-  }
-
-  &__balance {
-    background-color: var(--black-400);
-    font-weight: normal;
-    padding-right: 0.5rem;
-    text-align: right;
-  }
-}
-
 .calendar {
-  background-color: var(--white);
+  background-color: var(--calendar__background);
+  border: 1px solid var(--calendar__border-color);
+  box-shadow: 0 0.25rem 1rem rgba(12, 12, 12, 0.125);
+  box-sizing: border-box;
+  color: var(--calendar__color);
   display: grid;
+  flex: 0 1 100%;
+  grid-gap: 0;
+  justify-self: center;
+  overflow: hidden;
 
   &__toolbar {
     flex-grow: 1;
@@ -301,28 +311,42 @@ export default {
   &__weekdays {
     font-size: 0.75rem;
     font-weight: normal;
+    padding-bottom: var(--size_base);
+    padding-top: calc(4 * var(--size_base));
+
+    &--today {
+      text-decoration: underline;
+    }
+
+    &:first-of-type {
+      padding-left: calc(2 * var(--size_base));
+    }
   }
 
-  .day {
-    border: 1px solid lightgray;
-  }
-}
-
-.calendar__month {
-  align-items: center;
-  display: flex;
-  flex-flow: row wrap;
-  font-size: 1.25rem;
-  grid-column: 1 / span 7;
-  justify-content: space-between;
-
-  .selected-date {
+  &__month {
+    align-items: flex-start;
+    border-bottom: 1px solid var(--calendar__border-color);
+    box-sizing: border-box;
     display: flex;
-    flex-grow: 1;
-    width: 100%;
+    flex-flow: row wrap;
+    font-size: 1.25rem;
+    grid-column: 1 / span 7;
+    justify-content: space-between;
+    padding: calc(2 * var(--size_base));
 
-    .btn {
-      margin-left: auto;
+    .current-date {
+      font-size: 1.825rem;
+      font-weight: 300;
+      margin: 0 auto calc(4 * var(--size_base)) 0;
+    }
+
+    .selected-date {
+      align-items: center;
+      display: flex;
+      font-size: 0.925rem;
+      flex: 1 0 100%;
+      flex-flow: row nowrap;
+      justify-content: space-between;
     }
   }
 }

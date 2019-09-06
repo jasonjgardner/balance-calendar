@@ -178,4 +178,8 @@ export default class CalendarEvent {
   get id() {
     return this._id || this.getId();
   }
+
+  set id(value) {
+    this._id = value || this.getId();
+  }
 }

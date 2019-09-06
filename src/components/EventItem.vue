@@ -1,10 +1,22 @@
 <template>
   <div class="event">
-    <h4 class="event__title">{{ event.title }}</h4>
+    <div class="event__header">
+      <h4 class="event__title">{{ event.title }}</h4>
+
+      <button
+        class="btn btn--link"
+        type="button"
+        title="Remove event"
+        aria-label="Remove"
+        @click="remove"
+      >
+        <unicon name="times" fill="currentColor"/>
+      </button>
+    </div>
+
     <p
       :class="['event__amount', event.amount < 0 ? 'event__amount--debit' : 'event__amount--credit']"
     >{{event.amount | toCurrency }}</p>
-    <button class="btn" type="button" @click="remove">Remove</button>
   </div>
 </template>
 
@@ -33,7 +45,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .event {
   &__title,
   &__amount {
@@ -47,7 +59,14 @@ export default {
   }
 
   &__amount {
-    font-size: 0.925em;
+    font-size: 0.75rem;
+  }
+
+  &__header {
+    align-items: flex-start;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-start;
   }
 }
 </style>

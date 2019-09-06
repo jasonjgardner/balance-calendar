@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "date-fns": "2.0.1",
-    "vue": "^2.5.22"
+    "vue": "^2.5.22",
+    "vue-unicons": "1.4.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "3.6.0",
