@@ -1,5 +1,5 @@
 <template>
-  <div class="event">
+  <div :class="[classList, 'event']">
     <div class="event__header">
       <h4 class="event__title">{{ event.title }}</h4>
 
@@ -21,15 +21,18 @@
 </template>
 
 <script>
+import { isToday, isAfter } from "date-fns";
 import { EventBus } from "@/lib/EventBus";
-import { CalendarEvent } from "@/lib/CalendarEvent";
+import { CalendarEvent, isCalendarEvent } from "@/lib/CalendarEvent";
 
 export default {
   name: "EventItem",
   props: {
     event: {
-      type: CalendarEvent,
-      required: true
+      type: [Object, CalendarEvent],
+      required: true,
+      validator: v => isCalendarEvent(v),
+      default: () => ({})
     }
   },
   methods: {
@@ -40,6 +43,15 @@ export default {
      */
     remove() {
       EventBus.$emit("remove-event", this.event);
+    },
+    classList() {
+      const today = new Date();
+
+      return {
+        "event--past": isAfter(today, this.event.date),
+        "event--future": isAfter(this.event.date, today),
+        "event--today": isToday(this.event.date)
+      };
     }
   }
 };
@@ -47,6 +59,10 @@ export default {
 
 <style lang="scss">
 .event {
+  &--past {
+    opacity: 0.5;
+  }
+
   &__title,
   &__amount {
     font-size: 0.825rem;

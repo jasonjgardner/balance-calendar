@@ -12,27 +12,19 @@
         </template>
       </Calendar>
     </main>
-    <div class="event-list">
-      <h3>Events</h3>
-      <EventItem v-for="event in eventList" :event="event" :key="event.id" @remove="removeEvent"/>
+    <div class="events">
+      <EventForm :date="selectedDate" @submit="addEvent" @dismissed="showAddEvents = false"/>
+      <EventList :events="events"/>
     </div>
-    <EventForm :date="selectedDate" @submit="addEvent" @dismissed="showAddEvents = false"/>
   </div>
 </template>
 
 <script>
 import { EventBus } from "@/lib/EventBus";
-import CalendarEvent from "@/lib/CalendarEvent";
+import { CalendarEvent, isCalendarEvent } from "@/lib/CalendarEvent";
 import Calendar from "@/components/Calendar";
 import EventForm from "@/components/EventForm";
-import EventItem from "@/components/EventItem";
-
-/**
- * Test if an object is a CalendarEvent
- * @param {object} val - Value to test
- * @returns {boolean} Returns `true` if `val` is a CalendarEvent object
- */
-const isCalendarEvent = val => val instanceof CalendarEvent;
+import EventList from "@/components/EventList";
 
 /**
  * Save events to local storage
@@ -57,7 +49,7 @@ export default {
   components: {
     Calendar,
     EventForm,
-    EventItem
+    EventList
   },
   data() {
     return {
@@ -80,15 +72,7 @@ export default {
 
     EventBus.$on("remove-event", this.removeEvent);
   },
-  computed: {
-    /**
-     * List of events sorted by date
-     * @returns {CalendarEvent[]} - Array of CalendarEvents sorted by date in ascending order.
-     */
-    eventList() {
-      return this.events.slice().sort((a, b) => (a.date > b.date ? 1 : -1));
-    }
-  },
+
   methods: {
     /**
      * Create an event
@@ -121,13 +105,12 @@ export default {
   width: 100%;
 }
 
-.event-list {
+.events {
   background-color: var(--event-list__background);
   color: var(--event-list__color);
-  width: var(--event-list__size);
-}
-
-.event-form {
-  order: -2;
+  display: flex;
+  flex: 1 0 var(--event-list__size);
+  flex-flow: column nowrap;
+  height: 100%;
 }
 </style>

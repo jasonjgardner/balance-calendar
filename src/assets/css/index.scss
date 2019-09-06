@@ -4,6 +4,8 @@
   --size_base: 5px;
   --font-size_base: 16px;
   --color-primary_base: #{$theme-primary};
+  --color-primary_dark: #{$theme-dark};
+  --color-primary_darker: #{$theme-darker};
   --root__background: #{$neutral-tertiary};
   --root__color: #{$black};
   --btn__background: #{$theme-primary};
@@ -12,6 +14,7 @@
   --btn__background_hover: #{$theme-dark-alt};
   --btn__border-color_hover: #{$theme-darker};
   --btn__color_hover: #{$white};
+  --btn__min-width: calc(8 * var(--size_base));
   --btn-link__color: var(--color-primary_base);
   --calendar__background: #{$white};
   --calendar__color: #{$black};
@@ -23,17 +26,16 @@
   --day__color: #{$neutral-dark};
   --day__color_is-selected: var(--color-primary_base);
   --day__color_in-month: #{$neutral-darker};
-  --day__color_is-today: #{$black};
+  --day__color_is-today: #{$theme-primary};
   --day__size: calc(30 * var(--size_base));
   --day-balance__background: #{$neutral-lighter};
   --day-balance__color: #{$neutral-darker};
-  --event-form__size: calc(60 * var(--size_base));
   --event-form__background-color: #{$neutral-light};
   --event-form__border-color: #{$neutral-tertiary};
   --event-form__color: #{$black};
+  --event-form-controls__background-color: #{$theme-light};
   --event-list__background: #{$neutral-lighter};
   --event-list__color: #{$neutral-dark};
-  --event-list__size: calc(80 * var(--size_base));
   --input__background: #{$white};
   --input__border-color: #{$neutral-dark};
   --input__border-color_hover: #{$neutral-darker};
@@ -76,9 +78,14 @@ body {
   display: inline-flex;
   font-size: 0.825rem;
   font-weight: 500;
+  height: 2rem;
+  line-height: 2;
+  min-width: var(--btn__min-width);
   outline: none;
-  padding: 0.425em 0.666em;
+  padding: 0 1rem;
+  text-align: center;
   transition: background-color 0.425s ease-out, border-color 0.425s ease-out, color 0.425s ease-out;
+  vertical-align: top;
 
   &:hover,
   &:focus,
@@ -88,6 +95,11 @@ body {
     color: var(--btn__color_hover);
   }
 
+  &[disabled] {
+    cursor: not-allowed;
+    filter: opacity(0.9) grayscale(25%);
+  }
+
   &--link {
     background-color: transparent;
     border: 0;
@@ -95,7 +107,26 @@ body {
     color: var(--btn-link__color);
     padding: 0;
   }
+
+  &--outline {
+    background-color: transparent;
+    border-color: currentColor;
+    color: var(--btn__background);
+
+    &:hover {
+      background-color: rgba($white, 0.5);
+      color: var(--btn__background_hover);
+    }
+  }
+
+  & > svg:only-child {
+    margin: 0 auto;
+  }
 }
+
+///
+/// Transitions
+///
 
 .slide-up-enter-active,
 .slide-up-leave-active {
@@ -110,4 +141,19 @@ body {
 .slide-up-enter-to,
 .slide-up-leave {
   transform: translate(-50%, -50%);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease-out;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-to,
+.fade-leave {
+  opacity: 1;
 }

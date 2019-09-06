@@ -21,7 +21,7 @@
       <div class="input-group">
         <label class="label" for="event[title]">Name</label>
         <input
-          class="input"
+          class="input input--large"
           type="text"
           id="event[title]"
           name="event[title]"
@@ -75,8 +75,15 @@
         </div>
       </div>
 
-      <button class="btn" type="reset" @click.prevent="$emit('dismissed')">Cancel</button>
-      <button class="btn" type="submit" :disabled="!isValid">Save</button>
+      <div class="event-form__controls">
+        <button
+          class="btn btn--outline btn--secondary"
+          type="reset"
+          @click.prevent="cancelEvent"
+          :disabled="!isDirty"
+        >Cancel</button>
+        <button class="btn" type="submit" :disabled="!isValid">Save</button>
+      </div>
     </fieldset>
   </form>
 </template>
@@ -94,6 +101,7 @@ export default {
     }
   },
   data: () => ({
+    isDirty: false,
     isValid: false,
     event: {
       title: null,
@@ -114,6 +122,13 @@ export default {
         if (this.isValid) {
           this.event.date = value.date ? value.date : this.date;
         }
+
+        this.isDirty =
+          Object.values({
+            /// Ignore date input when testing for pristine fields
+            ...this.event.title,
+            ...this.event.amount
+          }).filter(v => !v || !v.length).length > 0; /// Event data is not empty
       },
       deep: true,
       immediate: true
@@ -130,6 +145,14 @@ export default {
      */
     addEvent() {
       this.$emit("submit", this.event);
+      this.event = {};
+    },
+    /**
+     * Resets form data and emits "dismissed" event
+     * @event EventForm#addEvent~dismissed
+     */
+    cancelEvent() {
+      this.$emit("dismissed");
       this.event = {};
     },
     /**
@@ -158,32 +181,70 @@ export default {
 .event-form {
   background-color: var(--event-form__background-color);
   border: 1px solid var(--event-form__border-color);
-  width: var(--event-form__size);
 
   & > fieldset {
     border: 0;
     height: 100%;
+    padding: 0;
+  }
+
+  &__controls {
+    align-items: center;
+    background-color: var(--event-form-controls__background-color);
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-end;
+    margin-top: calc(2 * var(--size_base));
+    padding: calc(2 * var(--size_base));
+    width: 100%;
+
+    .btn + .btn {
+      margin-left: var(--size_base);
+    }
   }
 }
 
 .input-group {
   align-items: center;
   display: flex;
+
+  & + .input-group {
+    margin-top: calc(2 * var(--size_base));
+  }
+
+  &:last-of-type {
+    margin-bottom: calc(2 * var(--size_base));
+  }
 }
 
 .label {
   display: inline-block;
   font-size: 0.825rem;
   font-weight: 600;
-  margin-right: var(--size_base);
+  margin: 0 var(--size_base) 0 calc(2 * var(--size_base));
   overflow: hidden;
   text-overflow: ellipsis;
-  width: calc(12 * var(--size_base));
+  width: calc(15 * var(--size_base));
+
+  &--day {
+    border-bottom: 1px solid var(--event-form__border-color);
+    color: var(--color-primary_dark);
+    display: block;
+    font-size: 1.25rem;
+    font-weight: bold;
+    line-height: 2;
+    padding: var(--size_base) calc(2 * var(--size_base));
+    width: 100%;
+  }
 }
 
 .input {
   border: 1px solid var(--input__border-color);
   border-radius: calc(0.5 * var(--size_base));
   padding: var(--size_base);
+  
+  &--large {
+    font-size: 1.125rem;
+  }
 }
 </style>

@@ -84,7 +84,6 @@ export default {
 
   &--is-today {
     background: var(--day__background_is-today);
-    border-top-width: var(--size_base);
     color: var(--day__color_is-today);
   }
 
@@ -140,7 +139,18 @@ export default {
   }
 }
 
-.day--is-today .day__title {
+.day--is-today::after {
+  background-color: var(--color-primary_base);
+  content: '';
+  display: block;
+  height: calc(2 * var(--size_base));
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: -1;
+}
+
+.day--is-today .day__title time {
   background-color: var(--day__background_today);
   border-radius: 50%;
   color: var(--day__color_is-today);

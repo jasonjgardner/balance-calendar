@@ -297,7 +297,7 @@ export default {
   box-sizing: border-box;
   color: var(--calendar__color);
   display: grid;
-  flex: 0 1 100%;
+  flex: 1 1 100%;
   grid-gap: 0;
   justify-self: center;
   overflow: hidden;
