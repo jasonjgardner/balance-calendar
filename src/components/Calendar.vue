@@ -27,14 +27,14 @@
           <unicon name="angle-right" fill="currentColor"/>
         </button>
       </div>
-      <div v-if="selectedDate" class="selected-date">
+      <!-- <div v-if="selectedDate" class="selected-date">
         <time
           :datetime="format(selectedDate, 'yyyy-MM-dd')"
         >{{ format(selectedDate, 'MMM d, yyyy') }}</time>
         <button class="btn btn--link" type="button" @click="selectedDate = null">
           <unicon name="times-circle" fill="currentColor"/>
         </button>
-      </div>
+      </div>-->
     </header>
     <div
       v-once
@@ -74,6 +74,7 @@ import {
   format
 } from "date-fns";
 import { EventBus } from "@/lib/EventBus";
+import Weekdays from "@/mixins/Weekdays";
 import CalendarDay from "@/components/CalendarDay";
 
 export default {
@@ -81,6 +82,7 @@ export default {
   components: {
     CalendarDay
   },
+  mixins: [Weekdays],
   props: {
     startDate: {
       required: false,
@@ -181,36 +183,6 @@ export default {
       }
 
       return days;
-    },
-    /**
-     * Get list of days of the week and their desired abbreviations
-     * @returns {{[string]:string}} Returns object with weekday names as keys and their abbreviations as values.
-     */
-    weekdays() {
-      const fullNames = [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday"
-      ];
-
-      let labels = fullNames;
-
-      if (localStorage.abbreviateCalendarLabels) {
-        labels = ["Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"];
-      }
-
-      if (localStorage.abbreviateCalendarLabels === "SINGLE_CHARACTER") {
-        labels = labels.map(a => a.charAt(0));
-      }
-
-      return labels.reduce((previousValue, value, idx) => {
-        previousValue[fullNames[idx]] = value;
-        return previousValue;
-      }, {});
     }
   },
   mounted() {
@@ -268,7 +240,11 @@ export default {
      * @param {Date} day - The event date to include
      */
     getEvents(day) {
-      return this.events.slice().filter(({ date }) => isSameDay(date, day));
+      let events = this.events
+        .slice()
+        .filter(({ date }) => isSameDay(date, day));
+
+      return events;
     },
     /**
      * Calculates balance for events up until the given day

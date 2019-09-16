@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "date-fns": "2.0.1",
+    "everydate": "1.2.0",
     "vue": "^2.5.22",
     "vue-unicons": "1.4.1"
   },

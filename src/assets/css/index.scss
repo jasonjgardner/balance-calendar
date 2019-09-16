@@ -19,12 +19,12 @@
   --calendar__background: #{$white};
   --calendar__color: #{$black};
   --calendar__size: auto;
-  --day__background: #{$white};
-  --day__background_past: #{$neutral-lighter};
+  --day__background:#{$neutral-lighter}; 
+  --day__background_future: #{$white};
   --day__border-color: #{$neutral-secondary};
   --day__border-color_hover: #{$neutral-tertiary};
   --day__color: #{$neutral-dark};
-  --day__color_is-selected: var(--color-primary_base);
+  --day__color_is-selected: #{$theme-primary};
   --day__color_in-month: #{$neutral-darker};
   --day__color_is-today: #{$theme-primary};
   --day__size: calc(30 * var(--size_base));
@@ -39,6 +39,24 @@
   --input__background: #{$white};
   --input__border-color: #{$neutral-dark};
   --input__border-color_hover: #{$neutral-darker};
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary_base: #{$theme-lighter};
+    --color-primary_dark: #{$theme-light};
+    --color-primary_darker: #{$theme-dark-alt};
+    --calendar__background: #{$neutral-darker};
+    --calendar__color: #{$white};
+    --day__background:#{$neutral-secondary}; 
+    --day__background_future: #{$neutral-dark};
+    --day-balance__background: #{$neutral-dark};
+    --day-balance__color: #{$neutral-lighter};
+    --day__color: #{$neutral-lighter-alt};
+    --day__color_is-selected: #{$theme-light};
+    --day__color_in-month: #{$neutral-light};
+    --day__color_is-today: #{$theme-primary};
+  }
 }
 
 html,

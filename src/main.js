@@ -9,7 +9,6 @@
 
 import "@/assets/css/index.scss";
 import Vue from "vue";
-import App from "./App.vue";
 import Unicon from "vue-unicons";
 import {
   uniAngleRight,
@@ -51,6 +50,10 @@ import {
   uniPlusSquare,
   uniStar
 } from "vue-unicons/src/icons";
+
+import App from "./App.vue";
+import { store } from "./store";
+import { CalendarEvent } from "./lib/CalendarEvent";
 
 Vue.config.productionTip = false;
 
@@ -112,5 +115,19 @@ Vue.filter("toCurrency", (value, locale = null, options = {}) => {
 });
 
 new Vue({
-  render: h => h(App)
+  render: h =>
+    h(App, {
+      props: {
+        events:
+          store.events.length > 0
+            ? store.events
+            : [
+                new CalendarEvent({
+                  title: "Schedule something",
+                  amount: 0,
+                  date: new Date()
+                })
+              ]
+      }
+    })
 }).$mount("#app");

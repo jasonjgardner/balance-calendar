@@ -75,6 +75,91 @@
         </div>
       </div>
 
+      <div class="input-group">
+        <label class="label" for="event[recurs]">Recurs</label>
+        <select class="input" id="event[recurs]" name="event[recurs]" v-model="event.recurs">
+          <option value="month">Monthly</option>
+          <option value="week">Weekly</option>
+          <option value="day">Daily</option>
+          <option value="year">Annually</option>
+        </select>
+      </div>
+
+      <div v-show="event.recurs === 'day'">
+        <label class="label" for="event[recurrance][day]">Every</label>
+        <input
+          class="input"
+          type="number"
+          id="event[recurrance][day]"
+          name="event[recurrance][day]"
+          step="1"
+          placeholder="Days"
+          min="1"
+          max="6"
+          v-model.number="event.recurrance.day"
+        >
+      </div>
+      <div v-show="event.recurs === 'week'">
+        <div class="input-group">
+          <label class="label" for="event[recurrance][week]">Every</label>
+          <input
+            class="input"
+            type="number"
+            id="event[recurrance][week]"
+            name="event[recurrance][week]"
+            step="1"
+            placeholder="Weeks"
+            min="1"
+            max="6"
+            v-model.number="event.recurrance.weeks"
+          >
+        </div>
+        <div class="input-group">
+          <div
+            v-once
+            v-for="(weekdayLabel, fullDayLabel) in weekdays"
+            :title="fullDayLabel"
+            :key="fullDayLabel"
+          >
+            <label>{{ weekdayLabel }}</label>
+            <input
+              class="input"
+              type="checkbox"
+              :value="fullDayLabel"
+              v-model="event.recurrance.week[fullDayLabel.toLowerCase()]"
+            >
+          </div>
+        </div>
+      </div>
+      <div v-show="event.recurs === 'month'">
+        <label class="label" for="event[recurrance][month]">Every</label>
+        <input
+          class="input"
+          type="number"
+          id="event[recurrance][month]"
+          name="event[recurrance][month]"
+          step="1"
+          placeholder="Months"
+          min="1"
+          max="11"
+          v-model.number="event.recurrance.month"
+        >
+      </div>
+      <div v-show="event.recurs === 'year'">
+        <label class="label" for="event[recurrance][year]">Every</label>
+        <input
+          class="input"
+          type="number"
+          id="event[recurrance][year]"
+          name="event[recurrance][year]"
+          step="1"
+          placeholder="Years"
+          min="1"
+          max="10"
+          v-model.number="event.recurrance.year"
+        >
+      </div>
+
       <div class="event-form__controls">
         <button
           class="btn btn--outline btn--secondary"
@@ -90,9 +175,11 @@
 
 <script>
 import { format } from "date-fns";
+import Weekdays from "@/mixins/Weekdays";
 
 export default {
   name: "EventForm",
+  mixins: [Weekdays],
   props: {
     date: {
       type: Date,
@@ -106,7 +193,15 @@ export default {
     event: {
       title: null,
       date: null,
-      amount: 0
+      amount: 0,
+      recurs: false,
+      recurrance: {
+        day: null,
+        week: {},
+        weeks: null,
+        month: null,
+        year: null
+      }
     }
   }),
   watch: {
@@ -136,6 +231,9 @@ export default {
   },
   created() {
     this.event.date = this.date;
+    this.event.recurrance.week = Object.keys(this.weekdays)
+      .map(s => s.toLowerCase())
+      .reduce((o, k) => ({ ...o, [k]: false }), {});
   },
   methods: {
     format,

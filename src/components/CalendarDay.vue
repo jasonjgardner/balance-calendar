@@ -1,12 +1,9 @@
 <template>
-  <article class="day" role="cell" :title="format(day.date, 'PPPP')">
+  <article class="day" role="cell" :title="format(day.date, 'PPPP')" @click="selectDay">
     <header class="day__header">
       <h3 class="day__title">
-        <time :datetime="format(day.date, 'yyyy-MM-dd')">{{ format(day.date, "d") }}</time>
+        <time :datetime="format(day.date, 'yyyy-MM-dd')">{{ dayLabel }}</time>
       </h3>
-      <button class="btn btn--link" type="button" @click="selectDay">
-        <unicon name="plus-square" fill="currentColor"/>
-      </button>
     </header>
     <div class="day__events">
       <EventItem v-for="event in day.events" :event="event" :key="event.id"/>
@@ -16,7 +13,7 @@
 </template>
 
 <script>
-import { format } from "date-fns";
+import { format, isFirstDayOfMonth } from "date-fns";
 import { EventBus } from "@/lib/EventBus";
 import EventItem from "@/components/EventItem";
 
@@ -41,6 +38,14 @@ export default {
     selectDay() {
       EventBus.$emit("select-day", this.day);
     }
+  },
+  computed: {
+    dayLabel() {
+      return format(
+        this.day.date,
+        isFirstDayOfMonth(this.day.date) ? "LLL d" : "d"
+      );
+    }
   }
 };
 </script>
@@ -50,7 +55,7 @@ export default {
 
 .day {
   align-items: flex-start;
-  background-color: var(--day__background_past);
+  background: var(--day__background);
   border-top: 1px solid var(--day__border-color);
   color: var(--day__color);
   display: flex;
@@ -73,23 +78,26 @@ export default {
 
   &--is-selected,
   &--is-today {
-    z-index: 1; /// Overlap border
+    z-index: 2; /// Overlap border
   }
 
-  &--is-selected {
-    background: var(--day__background_is-selected);
-    border-color: var(--day__border-color_is-selected, currentColor);
-    color: var(--day__color_is-selected);
+   &.day--in-month {
+     --day__color: var(--day__color_in-month);
+     --day__background: var(--day__background_in-month);
   }
 
-  &--is-today {
-    background: var(--day__background_is-today);
-    color: var(--day__color_is-today);
+  &.day--is-selected,
+  &.day--in-month.day--is-selected {
+    --day__color: var(--day__color_is-selected);
+    --day__border-color: var(--day__border-color_is-selected, currentColor);
+    --day__background: var(--day__background_is-selected);
+    box-shadow: inset 0 0 1px 1px var(--day__border-color);
+    outline: 1px solid var(--day__border-color, currentColor);
   }
 
-  &--in-month {
-    background: var(--day__background_in-month);
-    color: var(--day__color_in-month);
+  &.day--is-today {
+    --day__background: var(--day__background_is-today);
+    --day__color: var(--day__color_is-today);
   }
 
   &__header {
@@ -99,15 +107,6 @@ export default {
     margin: 0;
     padding: 0;
     width: 100%;
-
-    & > .btn--link {
-      line-height: 1;
-      margin: 0;
-      padding: 0;
-      position: absolute;
-      right: 0;
-      top: 0;
-    }
   }
 
   &__title,
@@ -115,7 +114,7 @@ export default {
     box-sizing: border-box;
     display: inline-block;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: normal;
     margin: 0;
   }
 
@@ -150,6 +149,11 @@ export default {
   z-index: -1;
 }
 
+.day--is-today .day__title,
+.day--is-selected .day__title {
+  font-weight: bold;
+}
+
 .day--is-today .day__title time {
   background-color: var(--day__background_today);
   border-radius: 50%;
@@ -159,7 +163,7 @@ export default {
 }
 
 .day--is-today ~ .day {
-  background-color: var(--day__background);
+  background-color: var(--day__background_future);
 }
 
 .day__title >>> .event {
