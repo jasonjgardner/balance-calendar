@@ -14,6 +14,8 @@
       </button>
     </div>
 
+    <p v-if="event.recurs">Recurs</p>
+
     <p
       :class="['event__amount', event.amount < 0 ? 'event__amount--debit' : 'event__amount--credit']"
     >{{event.amount | toCurrency }}</p>

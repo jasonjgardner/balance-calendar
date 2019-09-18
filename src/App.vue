@@ -13,6 +13,7 @@
 <script>
 import { EventBus } from "@/lib/EventBus";
 import { CalendarEvent, isCalendarEvent } from "@/lib/CalendarEvent";
+import { RecurringEvent } from "@/lib/RecurringEvent";
 import { mutations } from "./store";
 import Calendar from "@/components/Calendar";
 import EventForm from "@/components/EventForm";
@@ -56,10 +57,12 @@ export default {
   methods: {
     /**
      * Create an event
-     * @param {CalendarEvent} - Event data to store
+     * @param {CalendarEvent|RecurringEvent} - Event data to store
      */
     addEvent(event) {
-      mutations.addEvent(new CalendarEvent(event));
+      mutations.addEvent(
+        event.recurs ? new RecurringEvent(event) : new CalendarEvent(event)
+      );
     }
   }
 };

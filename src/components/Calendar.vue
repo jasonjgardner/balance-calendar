@@ -74,6 +74,7 @@ import {
   format
 } from "date-fns";
 import { EventBus } from "@/lib/EventBus";
+import { RecurringEvent } from "@/lib/RecurringEvent";
 import Weekdays from "@/mixins/Weekdays";
 import CalendarDay from "@/components/CalendarDay";
 
@@ -255,7 +256,7 @@ export default {
     getBalance(day, startingBalance = 0) {
       return this.events
         .slice()
-        .filter(({ date }) => isBefore(date, day) || isSameDay(date, day))
+        .filter(({ date, recur }) => isBefore(date, day) || isSameDay(date, day) || (recur instanceof RecurringEvent && recur.match(date)))
         .reduce(
           (previousBalance, { amount }) => parseFloat(amount) + previousBalance,
           startingBalance || this.startingBalance || 0

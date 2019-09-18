@@ -45,12 +45,12 @@
           min="-9999999.99"
           max="9999999.99"
           required
-          v-model="event.amount"
+          v-model.number="event.amount"
           @click="selectAll"
           @focus.native="selectAll"
         >
 
-        <div class="check-group" @click="amountCredit">
+        <div class="check-group" @click="event.amount = Math.abs(event.amount)">
           <input
             class="check-group__input"
             type="radio"
@@ -62,7 +62,7 @@
           <label for="event[amountType][credit]">Credit</label>
         </div>
 
-        <div class="check-group" @click="amountDebit">
+        <div class="check-group" @click="event.amount = Math.abs(event.amount) * -1">
           <input
             class="check-group__input"
             type="radio"
@@ -77,41 +77,41 @@
 
       <div class="input-group">
         <label class="label" for="event[recurs]">Recurs</label>
-        <select class="input" id="event[recurs]" name="event[recurs]" v-model="event.recurs">
-          <option value="month">Monthly</option>
-          <option value="week">Weekly</option>
-          <option value="day">Daily</option>
-          <option value="year">Annually</option>
+        <select class="input" id="event[recurs]" name="event[recurs]" v-model="event.measure">
+          <option value="months">Monthly</option>
+          <option value="weeks">Weekly</option>
+          <option value="days">Daily</option>
+          <option value="years">Annually</option>
         </select>
       </div>
 
-      <div v-show="event.recurs === 'day'">
-        <label class="label" for="event[recurrance][day]">Every</label>
+      <div v-show="event.measure === 'days'">
+        <label class="label" for="event[recurrance][days]">Every</label>
         <input
           class="input"
           type="number"
-          id="event[recurrance][day]"
-          name="event[recurrance][day]"
+          id="event[recurrance][days]"
+          name="event[recurrance][days]"
           step="1"
           placeholder="Days"
           min="1"
           max="6"
-          v-model.number="event.recurrance.day"
+          @input="setUnits"
         >
       </div>
-      <div v-show="event.recurs === 'week'">
+      <div v-show="event.measure === 'weeks'">
         <div class="input-group">
-          <label class="label" for="event[recurrance][week]">Every</label>
+          <label class="label" for="event[recurrance][weeks]">Every</label>
           <input
             class="input"
             type="number"
-            id="event[recurrance][week]"
-            name="event[recurrance][week]"
+            id="event[recurrance][weeks]"
+            name="event[recurrance][weeks]"
             step="1"
             placeholder="Weeks"
             min="1"
             max="6"
-            v-model.number="event.recurrance.weeks"
+            @input="setUnits"
           >
         </div>
         <div class="input-group">
@@ -126,37 +126,37 @@
               class="input"
               type="checkbox"
               :value="fullDayLabel"
-              v-model="event.recurrance.week[fullDayLabel.toLowerCase()]"
+              @input="setWeekdayUnits(fullDayLabel)"
             >
           </div>
         </div>
       </div>
-      <div v-show="event.recurs === 'month'">
-        <label class="label" for="event[recurrance][month]">Every</label>
+      <div v-show="event.measure === 'months'">
+        <label class="label" for="event[recurrance][months]">Every</label>
         <input
           class="input"
           type="number"
-          id="event[recurrance][month]"
-          name="event[recurrance][month]"
+          id="event[recurrance][months]"
+          name="event[recurrance][months]"
           step="1"
           placeholder="Months"
           min="1"
           max="11"
-          v-model.number="event.recurrance.month"
+          @input="setUnits"
         >
       </div>
-      <div v-show="event.recurs === 'year'">
-        <label class="label" for="event[recurrance][year]">Every</label>
+      <div v-show="event.measure === 'years'">
+        <label class="label" for="event[recurrance][years]">Every</label>
         <input
           class="input"
           type="number"
-          id="event[recurrance][year]"
-          name="event[recurrance][year]"
+          id="event[recurrance][years]"
+          name="event[recurrance][years]"
           step="1"
           placeholder="Years"
           min="1"
           max="10"
-          v-model.number="event.recurrance.year"
+          @input="setUnits"
         >
       </div>
 
@@ -194,14 +194,8 @@ export default {
       title: null,
       date: null,
       amount: 0,
-      recurs: false,
-      recurrance: {
-        day: null,
-        week: {},
-        weeks: null,
-        month: null,
-        year: null
-      }
+      measure: null,
+      units: []
     }
   }),
   watch: {
@@ -231,9 +225,6 @@ export default {
   },
   created() {
     this.event.date = this.date;
-    this.event.recurrance.week = Object.keys(this.weekdays)
-      .map(s => s.toLowerCase())
-      .reduce((o, k) => ({ ...o, [k]: false }), {});
   },
   methods: {
     format,
@@ -254,22 +245,22 @@ export default {
       this.event = {};
     },
     /**
-     * Sets the event amount to a negative value
-     */
-    amountDebit() {
-      this.event.amount = Math.abs(this.event.amount) * -1;
-    },
-    /**
-     * Sets the event amount to a positive value
-     */
-    amountCredit() {
-      this.event.amount = Math.abs(this.event.amount);
-    },
-    /**
      * Selects input value on click or focus
      */
     selectAll(focusEvent) {
       focusEvent.target.select();
+    },
+    setUnits(every) {
+      this.event.units = Array.from([every]);
+    },
+    setWeekdayUnits(day) {
+      const idx = Object.keys(this.weekdays).indexOf(day);
+
+      if (idx < 0) {
+        return;
+      }
+
+      this.event.units = [...Array.from(this.event.units), idx];
     }
   }
 };
